@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getRewriteUsageSummary } from '@/lib/rewrite/access'
 import { redirect } from 'next/navigation'
 import { RewriteForm } from './rewrite-form'
 
@@ -11,6 +12,8 @@ export default async function RewritePage() {
   if (!user) {
     redirect('/login?redirect=/rewrite')
   }
+
+  const usageSummary = await getRewriteUsageSummary(supabase, user.id)
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-8">
@@ -25,7 +28,7 @@ export default async function RewritePage() {
           輸入需要優化的段落，我們會在保留原始語義的基礎上，讓表達更自然、更有說服力。
         </p>
       </header>
-      <RewriteForm />
+      <RewriteForm initialUsage={usageSummary} />
     </div>
   )
 }

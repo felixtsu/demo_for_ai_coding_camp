@@ -1,14 +1,52 @@
 'use client'
 
-import { useState } from 'react'
-import { rewriteText } from '@/lib/deepseek'
+import Link from 'next/link'
+import { useMemo, useState } from 'react'
 
-export function RewriteForm() {
+type RewriteUsage = {
+  hasSubscription: boolean
+  planId?: string
+  planName?: string
+  quota?: number
+  remaining?: number
+  renewsAt?: string
+  used?: number
+}
+
+type RewriteFormProps = {
+  initialUsage: RewriteUsage
+}
+
+const formatRenewalDate = (isoString?: string) => {
+  if (!isoString) return null
+  try {
+    return new Intl.DateTimeFormat('zh-TW', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(new Date(isoString))
+  } catch {
+    return null
+  }
+}
+
+export function RewriteForm({ initialUsage }: RewriteFormProps) {
   const [inputText, setInputText] = useState('')
   const [outputText, setOutputText] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [usage, setUsage] = useState<RewriteUsage>(initialUsage)
+
+  const quota = usage.quota ?? 0
+  const remaining = usage.remaining ?? 0
+  const used = usage.used ?? (quota > 0 ? quota - remaining : 0)
+  const usageProgress = useMemo(
+    () => (quota > 0 ? Math.min(100, Math.round((used / quota) * 100)) : 0),
+    [quota, used]
+  )
+  const renewalDate = useMemo(() => formatRenewalDate(usage.renewsAt), [usage.renewsAt])
+  const isQuotaDepleted = usage.hasSubscription && quota > 0 && remaining <= 0
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -34,6 +72,17 @@ export function RewriteForm() {
 
       const data = await response.json()
       setOutputText(data.result)
+
+      if (data.usage) {
+        setUsage((prev) => ({
+          ...prev,
+          ...(data.usage as RewriteUsage),
+        }))
+      }
+
+      if (data.error) {
+        setError(data.error)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : '改寫失敗，請再試一次')
     } finally {
@@ -59,6 +108,49 @@ export function RewriteForm() {
       <div className="pointer-events-none absolute -right-20 bottom-0 h-56 w-56 rounded-full bg-gradient-to-br from-rose-300/20 via-purple-200/15 to-blue-200/20 blur-3xl" aria-hidden="true" />
       <div className="relative grid gap-10 lg:grid-cols-2">
         <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
+          <div className="space-y-3 rounded-3xl border border-slate-200/70 bg-white/85 p-5 shadow-sm dark:border-slate-700/70 dark:bg-slate-800/75">
+            {usage.hasSubscription ? (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-500">
+                    {usage.planName ?? '訂閱方案'}
+                  </span>
+                  <span className="text-sm font-semibold text-slate-600 dark:text-slate-200">
+                    今日剩餘 {remaining}/{quota}
+                  </span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-slate-200/60 dark:bg-slate-700/60">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 transition-all"
+                    style={{ width: `${usageProgress}%` }}
+                    aria-hidden="true"
+                  />
+                </div>
+                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                  <span>已使用 {used} 次</span>
+                  {renewalDate && <span>週期結束：{renewalDate}</span>}
+                </div>
+                {isQuotaDepleted && (
+                  <div className="rounded-2xl border border-amber-300/80 bg-amber-100/70 px-3 py-2 text-xs text-amber-700 dark:border-amber-300/40 dark:bg-amber-400/10 dark:text-amber-200">
+                    今日配額已用罄，您可以升級方案或等待配額重置。
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="space-y-3 text-center">
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-200">
+                  此功能僅限付費訂閱用戶使用，請先選擇適合您的方案。
+                </p>
+                <Link
+                  href="/pricing"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-indigo-200 bg-indigo-500/10 px-4 py-2 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-500/20 dark:border-indigo-400/60 dark:text-indigo-200"
+                >
+                  查看方案
+                </Link>
+              </div>
+            )}
+          </div>
+
           <div className="space-y-2">
             <label htmlFor="input-text" className="text-sm font-medium text-slate-600 dark:text-slate-200">
               輸入文字
@@ -76,7 +168,7 @@ export function RewriteForm() {
           <div className="flex flex-col gap-4">
             <button
               type="submit"
-              disabled={loading || !inputText.trim()}
+              disabled={loading || !inputText.trim() || !usage.hasSubscription || isQuotaDepleted}
               className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:scale-[1.01] hover:shadow-xl hover:shadow-indigo-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading && (
