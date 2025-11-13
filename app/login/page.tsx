@@ -22,9 +22,9 @@ export default async function LoginPage({
         <div className="pointer-events-none absolute -right-20 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-400/30 via-sky-300/20 to-purple-300/20 blur-3xl" aria-hidden="true" />
         <div className="relative space-y-6">
           <div className="text-center">
-            <h1 className="text-3xl font-semibold text-slate-900 dark:text-white">欢迎回来</h1>
+            <h1 className="text-3xl font-semibold text-slate-900 dark:text-white">歡迎回來</h1>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-              登录以继续使用高质量的 AI 改写工具。
+              登入以繼續使用高質素的 AI 改寫工具。
             </p>
           </div>
           <LoginForm redirect={searchParams.redirect} />

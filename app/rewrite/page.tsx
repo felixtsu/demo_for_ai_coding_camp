@@ -19,10 +19,10 @@ export default async function RewritePage() {
           Rewrite
         </span>
         <h1 className="text-4xl font-semibold tracking-tight text-slate-900 dark:text-white">
-          文本改写工作台
+          文字改寫工作台
         </h1>
         <p className="text-base leading-relaxed text-slate-600 dark:text-slate-300">
-          输入需要优化的段落，我们会在保留原始语义的基础上，让表达更自然、更有说服力。
+          輸入需要優化的段落，我們會在保留原始語義的基礎上，讓表達更自然、更有說服力。
         </p>
       </header>
       <RewriteForm />

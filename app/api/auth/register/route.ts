@@ -7,14 +7,14 @@ export async function POST(request: Request) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: '邮箱和密码都是必填项' },
+        { error: '電郵地址和密碼都是必填項' },
         { status: 400 }
       )
     }
 
     if (password.length < 6) {
       return NextResponse.json(
-        { error: '密码至少需要 6 个字符' },
+        { error: '密碼至少需要 6 個字元' },
         { status: 400 }
       )
     }
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
       // Email confirmation might be required
       return NextResponse.json({
         success: true,
-        message: '请检查您的邮箱以确认账户',
+        message: '請檢查您的電郵地址以確認帳戶',
         requiresConfirmation: true,
       })
     }
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, user: data.user })
   } catch (error) {
     return NextResponse.json(
-      { error: '注册失败，请重试' },
+      { error: '註冊失敗，請再試一次' },
       { status: 500 }
     )
   }

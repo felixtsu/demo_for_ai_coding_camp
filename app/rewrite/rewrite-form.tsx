@@ -29,13 +29,13 @@ export function RewriteForm() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || '改写失败')
+        throw new Error(errorData.error || '改寫失敗')
       }
 
       const data = await response.json()
       setOutputText(data.result)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '改写失败，请重试')
+      setError(err instanceof Error ? err.message : '改寫失敗，請再試一次')
     } finally {
       setLoading(false)
     }
@@ -49,7 +49,7 @@ export function RewriteForm() {
       setTimeout(() => setCopied(false), 2000)
     } catch (copyError) {
       console.error('Copy failed', copyError)
-      setError('复制失败，请稍后重试')
+      setError('複製失敗，請稍後再試')
     }
   }
 
@@ -61,7 +61,7 @@ export function RewriteForm() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
           <div className="space-y-2">
             <label htmlFor="input-text" className="text-sm font-medium text-slate-600 dark:text-slate-200">
-              输入文本
+              輸入文字
             </label>
             <textarea
               id="input-text"
@@ -69,7 +69,7 @@ export function RewriteForm() {
               onChange={(e) => setInputText(e.target.value)}
               rows={10}
               required
-              placeholder="请输入需要改写的文本..."
+              placeholder="請輸入需要改寫的文字…"
               className="min-h-[240px] w-full resize-none rounded-3xl border border-slate-200/70 bg-white/85 px-5 py-4 text-base leading-relaxed text-slate-900 shadow-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200/80 dark:border-slate-700/70 dark:bg-slate-800/75 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-400/40"
             />
           </div>
@@ -82,10 +82,10 @@ export function RewriteForm() {
               {loading && (
                 <span className="inline-flex h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" />
               )}
-              {loading ? '改写中…' : '开始改写'}
+              {loading ? '改寫中…' : '開始改寫'}
             </button>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              支持粘贴 markdown、文章段落或任何需要润色的文本。
+              支援貼上 Markdown、文章段落或任何需要潤飾的文字。
             </p>
           </div>
           {error && (
@@ -97,11 +97,11 @@ export function RewriteForm() {
         <div className="flex h-full flex-col gap-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-300">
-              改写结果
+              改寫結果
             </h2>
             <div className="flex items-center gap-3">
               {copied && (
-                <span className="text-xs font-medium text-emerald-500">已复制到剪贴板</span>
+                <span className="text-xs font-medium text-emerald-500">已複製到剪貼簿</span>
               )}
               <button
                 type="button"
@@ -109,7 +109,7 @@ export function RewriteForm() {
                 disabled={!outputText}
                 className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700/70 dark:bg-slate-800/80 dark:text-slate-200"
               >
-                复制
+                複製
               </button>
             </div>
           </div>
@@ -117,7 +117,7 @@ export function RewriteForm() {
             readOnly
             value={outputText}
             rows={10}
-            placeholder="改写后的文本将显示在此，支持直接复制或二次编辑。"
+            placeholder="改寫後的文字會在此顯示，支援直接複製或再次編輯。"
             className="min-h-[240px] w-full resize-none rounded-3xl border border-slate-200/70 bg-slate-50/80 px-5 py-4 text-base leading-relaxed text-slate-800 shadow-inner transition dark:border-slate-700/70 dark:bg-slate-800/70 dark:text-slate-100"
           />
         </div>

@@ -29,7 +29,7 @@ export function RegisterForm() {
 
       if (!data.session) {
         // Email confirmation might be required
-        setError('请检查您的邮箱以确认账户')
+        setError('請檢查您的電郵地址以確認帳戶')
         setLoading(false)
         return
       }
@@ -38,7 +38,7 @@ export function RegisterForm() {
       await new Promise(resolve => setTimeout(resolve, 300))
       window.location.href = '/rewrite'
     } catch (err) {
-      setError('注册失败，请重试')
+      setError('註冊失敗，請再試一次')
       setLoading(false)
     }
   }
@@ -53,7 +53,7 @@ export function RegisterForm() {
       <div className="space-y-5">
         <div className="space-y-2">
           <label htmlFor="email" className="text-sm font-medium text-slate-600 dark:text-slate-200">
-            邮箱
+            電郵地址
           </label>
           <input
             id="email"
@@ -67,7 +67,7 @@ export function RegisterForm() {
         </div>
         <div className="space-y-2">
           <label htmlFor="password" className="text-sm font-medium text-slate-600 dark:text-slate-200">
-            密码
+            密碼
           </label>
           <input
             id="password"
@@ -79,7 +79,7 @@ export function RegisterForm() {
             minLength={6}
             className="w-full rounded-2xl border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200/80 dark:border-slate-700/70 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-400/40"
           />
-          <p className="text-xs text-slate-500 dark:text-slate-400">密码至少 6 个字符</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">密碼至少 6 個字元</p>
         </div>
       </div>
       <button
@@ -87,7 +87,7 @@ export function RegisterForm() {
         disabled={loading}
         className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:scale-[1.01] hover:shadow-xl hover:shadow-indigo-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {loading ? '注册中…' : '注册'}
+        {loading ? '註冊中…' : '註冊'}
       </button>
     </form>
   )

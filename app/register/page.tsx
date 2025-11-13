@@ -18,9 +18,9 @@ export default async function RegisterPage() {
         <div className="pointer-events-none absolute -left-16 top-8 h-40 w-40 rounded-full bg-gradient-to-br from-sky-400/25 via-indigo-300/20 to-purple-300/25 blur-3xl" aria-hidden="true" />
         <div className="relative space-y-6">
           <div className="text-center">
-            <h1 className="text-3xl font-semibold text-slate-900 dark:text-white">创建新账号</h1>
+            <h1 className="text-3xl font-semibold text-slate-900 dark:text-white">建立新帳戶</h1>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-              注册后即可无限制使用文本改写与语气优化功能。
+              註冊後即可無限制使用文字改寫與語氣優化功能。
             </p>
           </div>
           <RegisterForm />

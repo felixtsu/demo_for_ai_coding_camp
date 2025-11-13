@@ -11,13 +11,13 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 })
+      return NextResponse.json({ error: '未授權' }, { status: 401 })
     }
 
     const { text } = await request.json()
 
     if (!text || typeof text !== 'string' || !text.trim()) {
-      return NextResponse.json({ error: '请输入有效的文本' }, { status: 400 })
+      return NextResponse.json({ error: '請輸入有效的文字' }, { status: 400 })
     }
 
     const result = await rewriteText(text)
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Rewrite error:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : '改写失败' },
+      { error: error instanceof Error ? error.message : '改寫失敗' },
       { status: 500 }
     )
   }

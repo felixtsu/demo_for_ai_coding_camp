@@ -17,7 +17,7 @@ export function LoginForm({ redirect }: { redirect?: string }) {
 
     // Validate inputs
     if (!email || !password) {
-      setError('请输入邮箱和密码')
+      setError('請輸入電郵地址和密碼')
       setLoading(false)
       return
     }
@@ -27,7 +27,7 @@ export function LoginForm({ redirect }: { redirect?: string }) {
       console.log('Attempting login with email:', trimmedEmail, 'password length:', password.length)
       
       if (!trimmedEmail || !password) {
-        setError('邮箱和密码不能为空')
+        setError('電郵地址和密碼不能為空')
         setLoading(false)
         return
       }
@@ -39,14 +39,14 @@ export function LoginForm({ redirect }: { redirect?: string }) {
 
       if (signInError) {
         console.error('Login error:', signInError)
-        setError(signInError.message || '登录失败，请检查邮箱和密码')
+        setError(signInError.message || '登入失敗，請檢查電郵地址和密碼')
         setLoading(false)
         return
       }
 
       if (!data.session) {
         console.error('No session received')
-        setError('登录失败，未获取到会话')
+        setError('登入失敗，未能取得工作階段')
         setLoading(false)
         return
       }
@@ -62,7 +62,7 @@ export function LoginForm({ redirect }: { redirect?: string }) {
       window.location.href = targetUrl
     } catch (err) {
       console.error('Login exception:', err)
-      setError('登录失败，请重试')
+      setError('登入失敗，請再試一次')
       setLoading(false)
     }
   }
@@ -79,7 +79,7 @@ export function LoginForm({ redirect }: { redirect?: string }) {
       <div className="space-y-5">
         <div className="space-y-2">
           <label htmlFor="email" className="text-sm font-medium text-slate-600 dark:text-slate-200">
-            邮箱
+            電郵地址
           </label>
           <input
             id="email"
@@ -93,7 +93,7 @@ export function LoginForm({ redirect }: { redirect?: string }) {
         </div>
         <div className="space-y-2">
           <label htmlFor="password" className="text-sm font-medium text-slate-600 dark:text-slate-200">
-            密码
+            密碼
           </label>
           <input
             id="password"
@@ -111,7 +111,7 @@ export function LoginForm({ redirect }: { redirect?: string }) {
         disabled={loading}
         className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:scale-[1.01] hover:shadow-xl hover:shadow-indigo-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {loading ? '登录中…' : '登录'}
+        {loading ? '登入中…' : '登入'}
       </button>
     </form>
   )

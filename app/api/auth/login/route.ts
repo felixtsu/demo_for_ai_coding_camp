@@ -7,7 +7,7 @@ export async function POST(request: Request) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: '邮箱和密码都是必填项' },
+        { error: '電郵地址和密碼都是必填項' },
         { status: 400 }
       )
     }
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
 
     if (!data.session) {
       return NextResponse.json(
-        { error: '登录失败，未获取到会话' },
+        { error: '登入失敗，未能取得工作階段' },
         { status: 401 }
       )
     }
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     return response
   } catch (error) {
     return NextResponse.json(
-      { error: '登录失败，请重试' },
+      { error: '登入失敗，請再試一次' },
       { status: 500 }
     )
   }
