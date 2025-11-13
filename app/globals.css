@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 15, 23, 42;
+  --background-start-rgb: 246, 248, 255;
+  --background-mid-rgb: 235, 244, 255;
+  --background-end-rgb: 225, 236, 255;
+  --card-bg: rgba(255, 255, 255, 0.82);
+  --card-border: rgba(148, 163, 184, 0.24);
+  --blur-radius: 18px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 226, 232, 240;
+    --background-start-rgb: 15, 23, 42;
+    --background-mid-rgb: 30, 41, 59;
+    --background-end-rgb: 15, 23, 42;
+    --card-bg: rgba(15, 23, 42, 0.84);
+    --card-border: rgba(148, 163, 184, 0.3);
+    --blur-radius: 20px;
+    color-scheme: dark;
+  }
+}
+
+body {
+  min-height: 100vh;
+  color: rgb(var(--foreground-rgb));
+  background:
+      radial-gradient(120% 80% at 0% 0%, rgba(99, 102, 241, 0.18), transparent 70%),
+      radial-gradient(100% 70% at 100% 10%, rgba(14, 165, 233, 0.15), transparent 60%),
+      radial-gradient(160% 120% at 50% 100%, rgba(244, 114, 182, 0.12), transparent 70%),
+      linear-gradient(
+        180deg,
+        rgba(var(--background-start-rgb), 1) 0%,
+        rgba(var(--background-mid-rgb), 0.92) 35%,
+        rgba(var(--background-end-rgb), 0.94) 100%
+      );
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
