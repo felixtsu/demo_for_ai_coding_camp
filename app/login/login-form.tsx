@@ -71,14 +71,14 @@ export function LoginForm({ redirect }: { redirect?: string }) {
     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       <div aria-live="assertive" className="space-y-2">
         {error && (
-          <div className="rounded-2xl border border-rose-200/80 bg-rose-50/90 px-4 py-3 text-sm text-rose-600 shadow-sm dark:border-rose-400/40 dark:bg-rose-500/10 dark:text-rose-200">
+          <div className="rounded-lg border border-[#D9D9D9] bg-[#F5F5F5] px-4 py-3 text-sm font-normal text-[#1E1E1E]">
             {error}
           </div>
         )}
       </div>
       <div className="space-y-5">
         <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium text-slate-600 dark:text-slate-200">
+          <label htmlFor="email" className="text-base font-semibold leading-[1.4] text-[#1E1E1E]">
             電郵地址
           </label>
           <input
@@ -88,11 +88,11 @@ export function LoginForm({ redirect }: { redirect?: string }) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full rounded-2xl border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200/80 dark:border-slate-700/70 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-400/40"
+            className="w-full rounded-lg border border-[#D9D9D9] bg-white px-4 py-3 text-base font-normal text-[#1E1E1E] transition focus:border-[#1E1E1E] focus:outline-none"
           />
         </div>
         <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-medium text-slate-600 dark:text-slate-200">
+          <label htmlFor="password" className="text-base font-semibold leading-[1.4] text-[#1E1E1E]">
             密碼
           </label>
           <input
@@ -102,14 +102,14 @@ export function LoginForm({ redirect }: { redirect?: string }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full rounded-2xl border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200/80 dark:border-slate-700/70 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-400/40"
+            className="w-full rounded-lg border border-[#D9D9D9] bg-white px-4 py-3 text-base font-normal text-[#1E1E1E] transition focus:border-[#1E1E1E] focus:outline-none"
           />
         </div>
       </div>
       <button
         type="submit"
         disabled={loading}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:scale-[1.01] hover:shadow-xl hover:shadow-indigo-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[#2C2C2C] bg-[#2C2C2C] px-6 py-3 text-base font-normal text-white transition-all duration-200 hover:bg-[#1E1E1E] hover:scale-[1.02] active:scale-[0.98] active:bg-[#0F0F0F] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 disabled:active:scale-100"
       >
         {loading ? '登入中…' : '登入'}
       </button>

@@ -16,10 +16,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-      <html lang="zh-HK">
-      <body className={`${inter.className} antialiased text-slate-900 dark:text-slate-100`}>
+    <html lang="zh-HK">
+      <body className={`${inter.className} antialiased bg-white text-[#1E1E1E]`}>
         <Navigation />
-        <main className="relative mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-6xl flex-col px-4 pb-20 pt-12 sm:px-6 lg:px-8">
+        <main className="relative mx-auto flex min-h-[calc(100vh-5rem)] w-full flex-col">
           {children}
         </main>
       </body>

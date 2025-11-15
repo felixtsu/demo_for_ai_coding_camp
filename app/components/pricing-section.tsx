@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import { getRewriteUsageSummary } from '@/lib/rewrite/access'
 
 type Plan = {
   id: string
@@ -20,14 +21,14 @@ const FALLBACK_PLANS: Plan[] = [
   {
     id: 'professional',
     name: 'Professional',
-    description: '專為專業寫作者設計，每日 20 次改寫，支援高流量需求。',
+    description: '專業寫作者方案，每日 20 次改寫。',
     daily_quota: 20,
     price_cents: 24900,
   },
   {
     id: 'team',
     name: 'Team',
-    description: '團隊合用方案，每日 60 次配額並支援多位成員。',
+    description: '團隊合用方案，每日 60 次配額。',
     daily_quota: 60,
     price_cents: 59900,
   },
@@ -42,6 +43,10 @@ const formatPrice = (priceCents: number) =>
 
 export default async function PricingSection() {
   const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
   const { data: plans, error } = await supabase
     .from('subscription_plans')
     .select('id, name, description, daily_quota, price_cents')
@@ -51,11 +56,56 @@ export default async function PricingSection() {
     console.error('Load plans failed:', error)
   }
 
-  const planList = (plans && plans.length > 0 ? plans : FALLBACK_PLANS).map((plan) => ({
+  // 過濾掉測試方案，只顯示正式方案
+  const filteredPlans = plans && plans.length > 0 
+    ? plans.filter(plan => plan.id !== 'pro-test')
+    : FALLBACK_PLANS
+
+  const planList = filteredPlans.map((plan) => ({
     ...plan,
     price_cents: plan.price_cents ?? 0,
     daily_quota: plan.daily_quota ?? 0,
   }))
+
+  // 獲取用戶訂閱資訊
+  let currentPlanId: string | undefined
+  if (user) {
+    try {
+      const usageSummary = await getRewriteUsageSummary(supabase, user.id)
+      currentPlanId = usageSummary.planId
+    } catch (error) {
+      console.error('Failed to get subscription info:', error)
+    }
+  }
+
+  const getButtonText = (planId: string) => {
+    if (!user) {
+      return '登入以訂閱'
+    }
+    if (currentPlanId === planId) {
+      return '當前計劃'
+    }
+    if (currentPlanId) {
+      // 比較價格來判斷是升級還是降級
+      const currentPlan = planList.find(p => p.id === currentPlanId)
+      const targetPlan = planList.find(p => p.id === planId)
+      if (currentPlan && targetPlan) {
+        return targetPlan.price_cents > currentPlan.price_cents ? '升級計劃' : '降級計劃'
+      }
+      return '升級計劃'
+    }
+    return '訂購'
+  }
+
+  const getButtonHref = (planId: string) => {
+    if (!user) {
+      return `/login?redirect=/rewrite`
+    }
+    if (currentPlanId === planId) {
+      return `/rewrite`
+    }
+    return `/rewrite?upgrade=${planId}`
+  }
 
   return (
     <section className="flex flex-col gap-8">
@@ -75,19 +125,14 @@ export default async function PricingSection() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        {planList.map((plan, index) => {
-          const isHighlighted = index === 1
+        {planList.map((plan) => {
           return (
             <div
               key={plan.id}
-              className={`flex flex-col gap-6 rounded-lg border p-6 transition hover:shadow-lg ${
-                isHighlighted
-                  ? 'border-indigo-500/50 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-sky-500/10 shadow-xl shadow-indigo-500/10 dark:border-indigo-400/50 dark:from-indigo-500/20 dark:via-purple-500/20 dark:to-sky-500/20'
-                  : 'border-white/70 bg-white/85 shadow-md shadow-indigo-500/5 backdrop-blur-xl dark:border-slate-700/60 dark:bg-slate-900/80'
-              }`}
+              className="flex flex-col gap-6 rounded-lg border border-white/70 bg-white/85 p-6 shadow-md shadow-indigo-500/5 backdrop-blur-xl transition hover:shadow-lg dark:border-slate-700/60 dark:bg-slate-900/80"
             >
               <div className="space-y-2">
-                <h3 className={`text-xl font-semibold ${isHighlighted ? 'text-indigo-600 dark:text-indigo-300' : 'text-slate-900 dark:text-white'}`}>
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
                   {plan.name}
                 </h3>
                 <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
@@ -97,10 +142,10 @@ export default async function PricingSection() {
 
               <div className="space-y-1">
                 <div className="flex items-baseline gap-1">
-                  <span className={`text-3xl font-semibold ${isHighlighted ? 'text-indigo-600 dark:text-indigo-300' : 'text-slate-900 dark:text-white'}`}>
+                  <span className="text-3xl font-semibold text-slate-900 dark:text-white">
                     {formatPrice(plan.price_cents).replace('TWD', '').trim()}
                   </span>
-                  <span className={`text-base font-medium ${isHighlighted ? 'text-indigo-600/80 dark:text-indigo-300/80' : 'text-slate-600 dark:text-slate-400'}`}>
+                  <span className="text-base font-medium text-slate-600 dark:text-slate-400">
                     / 月
                   </span>
                 </div>
@@ -134,21 +179,19 @@ export default async function PricingSection() {
 
               <div className="mt-auto space-y-3">
                 <Link
-                  href={`/login?redirect=/rewrite`}
-                  className={`inline-flex w-full items-center justify-center rounded-lg px-5 py-3 text-sm font-semibold transition hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
-                    isHighlighted
-                      ? 'bg-white text-indigo-600 shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 focus-visible:outline-indigo-400 dark:bg-indigo-600 dark:text-white dark:shadow-indigo-500/30 dark:hover:shadow-indigo-500/40'
-                      : 'bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 text-white shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 focus-visible:outline-indigo-400'
-                  }`}
+                  href={getButtonHref(plan.id)}
+                  className="inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-200 hover:scale-[1.02] hover:shadow-xl hover:shadow-indigo-500/40 active:scale-[0.98] active:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
                 >
-                  登入以訂閱
+                  {getButtonText(plan.id)}
                 </Link>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  已是訂閱用戶？前往{' '}
-                  <Link href="/rewrite" className="underline underline-offset-4 hover:text-indigo-600 dark:hover:text-indigo-400">
-                    改寫工具
-                  </Link>
-                </p>
+                {!user && (
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    已是訂閱用戶？前往{' '}
+                    <Link href="/rewrite" className="underline underline-offset-4 hover:text-indigo-600 dark:hover:text-indigo-400">
+                      改寫工具
+                    </Link>
+                  </p>
+                )}
               </div>
             </div>
           )

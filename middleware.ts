@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {ddd
+    {
       cookies: {
         getAll() {
           return request.cookies.getAll()
@@ -56,4 +56,3 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
-

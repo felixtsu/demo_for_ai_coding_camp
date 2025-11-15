@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { NavLink } from './nav-link'
 
 export async function Navigation() {
   const supabase = await createClient()
@@ -15,26 +16,30 @@ export async function Navigation() {
     redirect('/login')
   }
 
+  const navItems = [
+    { href: '/pricing', label: 'Pricing' },
+    { href: '/contact', label: 'Contact' },
+  ]
+
   return (
-    <nav className="sticky top-0 z-50 border-b border-white/40 bg-white/70 backdrop-blur-md shadow-sm transition dark:border-slate-700/60 dark:bg-slate-900/70">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 via-sky-500 to-purple-500 text-sm font-semibold text-white shadow-md">
+    <nav className="sticky top-0 z-50 border-b border-[#D9D9D9] bg-white">
+      <div className="mx-auto flex w-full max-w-[1200px] flex-wrap items-center justify-between gap-6 px-8 py-8">
+        <div className="flex items-center gap-6">
+          <Link href="/" className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1E1E1E] text-sm font-semibold text-white">
             AI
-          </div>
-          <Link
-            href="/"
-            className="text-lg font-semibold tracking-tight text-slate-900 transition hover:text-indigo-600 dark:text-white dark:hover:text-sky-300"
-          >
-            文字改寫工具
           </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            {navItems.map((item) => (
+              <NavLink key={item.label} href={item.href} label={item.label} />
+            ))}
+          </div>
         </div>
-        <div className="flex items-center gap-3 text-sm">
+        <div className="flex items-center gap-3">
           {user ? (
             <>
               <Link
                 href="/rewrite"
-                className="rounded-full px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-50/10 dark:hover:text-white"
+                className="rounded-lg border border-[#767676] bg-[#E3E3E3] px-2 py-2 text-base font-normal text-[#1E1E1E] transition-all duration-200 hover:bg-[#D9D9D9] hover:scale-[1.05] active:scale-[0.95] active:bg-[#CCCCCC]"
               >
                 改寫
               </Link>
@@ -44,7 +49,7 @@ export async function Navigation() {
               <form action={signOut}>
                 <button
                   type="submit"
-                  className="rounded-full px-3 py-2 font-medium text-slate-600 transition hover:bg-rose-500/10 hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-300"
+                  className="rounded-lg border border-[#2C2C2C] bg-[#2C2C2C] px-2 py-2 text-base font-normal text-white transition-all duration-200 hover:bg-[#1E1E1E] hover:scale-[1.05] active:scale-[0.95] active:bg-[#0F0F0F]"
                 >
                   登出
                 </button>
@@ -54,15 +59,15 @@ export async function Navigation() {
             <>
               <Link
                 href="/login"
-                className="rounded-full px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-50/10 dark:hover:text-white"
+                className="rounded-lg border border-[#767676] bg-[#E3E3E3] px-2 py-2 text-base font-normal text-[#1E1E1E] transition-all duration-200 hover:bg-[#D9D9D9] hover:scale-[1.05] active:scale-[0.95] active:bg-[#CCCCCC]"
               >
-                登入
+                Sign in
               </Link>
               <Link
                 href="/register"
-                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:shadow-xl hover:shadow-indigo-500/40"
+                className="rounded-lg border border-[#2C2C2C] bg-[#2C2C2C] px-2 py-2 text-base font-normal text-white transition-all duration-200 hover:bg-[#1E1E1E] hover:scale-[1.05] active:scale-[0.95] active:bg-[#0F0F0F]"
               >
-                註冊
+                Register
               </Link>
             </>
           )}
