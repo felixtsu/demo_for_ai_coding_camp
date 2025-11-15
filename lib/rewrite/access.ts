@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-type GenericSupabaseClient = SupabaseClient<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>
+type GenericSupabaseClient = SupabaseClient<any, any, any>
 
 const ACTIVE_SUBSCRIPTION_STATUSES = ['active', 'trialing'] as const
 
