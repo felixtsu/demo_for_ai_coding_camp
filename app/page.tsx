@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import PricingSection from '@/app/components/pricing-section'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -41,7 +42,7 @@ export default async function Home() {
               </Link>
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white/80 px-6 py-3 text-base font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200/70 transition hover:bg-white hover:ring-slate-300 dark:bg-slate-800/80 dark:text-slate-200 dark:ring-slate-700"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 px-6 py-3 text-lg font-semibold text-white shadow-lg shadow-purple-500/30 transition hover:scale-[1.01] hover:shadow-xl hover:shadow-purple-500/40"
               >
                 已有帳戶？登入
               </Link>
@@ -111,6 +112,8 @@ export default async function Home() {
           </article>
         ))}
       </section>
+
+      <PricingSection />
     </div>
   )
 }

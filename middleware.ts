@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
+    {ddd
       cookies: {
         getAll() {
           return request.cookies.getAll()
