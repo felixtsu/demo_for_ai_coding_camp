@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-type GenericSupabaseClient = SupabaseClient<any, any, any>
+type GenericSupabaseClient = SupabaseClient<any, 'public', any>
 
 const ACTIVE_SUBSCRIPTION_STATUSES = ['active', 'trialing'] as const
 
@@ -79,7 +79,11 @@ export async function getRewriteUsageSummary(
     return { hasSubscription: false }
   }
 
-  if (!subscription.plan) {
+  // Handle plan which could be an array or single object
+  const planRaw = subscription.plan as any
+  const plan = Array.isArray(planRaw) ? planRaw[0] : planRaw
+
+  if (!plan) {
     // 如果訂閱存在但方案不存在，嘗試直接查詢方案
     const { data: directPlan } = await supabase
       .from('subscription_plans')
@@ -129,7 +133,7 @@ export async function getRewriteUsageSummary(
     return { hasSubscription: false }
   }
 
-  const quota = subscription.plan.daily_quota ?? 0
+  const quota = (plan as any).daily_quota ?? 0
 
   if (quota <= 0) {
     return { hasSubscription: false }
@@ -155,8 +159,8 @@ export async function getRewriteUsageSummary(
 
   return {
     hasSubscription: true,
-    planId: subscription.plan.id ?? undefined,
-    planName: subscription.plan.name ?? undefined,
+    planId: (plan as any).id ?? undefined,
+    planName: (plan as any).name ?? undefined,
     quota,
     remaining,
     renewsAt: subscription.current_period_end ?? undefined,
