@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export const runtime = 'nodejs'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_', {
-  apiVersion: '2024-06-20',
+  apiVersion: '2024-04-10',
 })
 
 export async function POST(request: Request) {
