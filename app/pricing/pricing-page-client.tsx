@@ -23,6 +23,8 @@ type PricingPageClientProps = {
 
 export function PricingPageClient({ plans, currentPlanId, isLoggedIn = false }: PricingPageClientProps) {
   const [period, setPeriod] = useState<'monthly' | 'yearly'>('monthly')
+  const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const getPrice = (priceCents: number) => {
     return period === 'yearly' ? Math.round(priceCents * 10) : priceCents
@@ -47,14 +49,40 @@ export function PricingPageClient({ plans, currentPlanId, isLoggedIn = false }: 
     return '訂購'
   }
 
-  const getButtonHref = (planId: string) => {
+  const handleSubscribe = async (planId: string) => {
+    setErrorMessage(null)
     if (!isLoggedIn) {
-      return `/login?redirect=/rewrite`
+      window.location.href = `/login?redirect=/pricing`
+      return
     }
     if (currentPlanId === planId) {
-      return `/rewrite`
+      window.location.href = `/rewrite`
+      return
     }
-    return `/rewrite?upgrade=${planId}`
+    try {
+      setLoadingPlanId(planId)
+      const response = await fetch('/api/orders/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan_id: planId, billing_period: period }),
+      })
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data?.error || '建立訂單失敗')
+      }
+      const data = await response.json()
+      const url: string | undefined = data?.url
+      if (!url) {
+        throw new Error('未取得支付鏈接')
+      }
+      // Open Stripe Payment Link in a new tab
+      window.open(url, '_blank', 'noopener,noreferrer')
+    } catch (e) {
+      const message = e instanceof Error ? e.message : '建立訂單失敗'
+      setErrorMessage(message)
+    } finally {
+      setLoadingPlanId(null)
+    }
   }
 
   return (
@@ -62,6 +90,12 @@ export function PricingPageClient({ plans, currentPlanId, isLoggedIn = false }: 
       <HeroSection title="Pricing" subtitle="Choose the plan that works for you" />
       <div className="mx-auto flex w-full max-w-[1200px] flex-col items-center gap-12 bg-white px-16 py-16">
         <PricingToggle onToggle={setPeriod} defaultPeriod="monthly" />
+
+        {errorMessage && (
+          <div className="w-full max-w-[1200px] rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {errorMessage}
+          </div>
+        )}
 
         <div className="grid w-full grid-cols-3 gap-16 items-stretch">
           {plans.map((plan) => {
@@ -97,12 +131,13 @@ export function PricingPageClient({ plans, currentPlanId, isLoggedIn = false }: 
                     <li>即時生成優化內容</li>
                   </ul>
                 </div>
-                <Link
-                  href={getButtonHref(plan.id)}
-                  className="w-full rounded-lg border border-[#2C2C2C] bg-[#2C2C2C] px-3 py-3 text-center text-base font-normal text-white transition-all duration-200 hover:bg-[#1E1E1E] hover:scale-[1.02] active:scale-[0.98] active:bg-[#0F0F0F]"
+                <button
+                  onClick={() => handleSubscribe(plan.id)}
+                  disabled={loadingPlanId === plan.id}
+                  className="w-full rounded-lg border border-[#2C2C2C] bg-[#2C2C2C] px-3 py-3 text-center text-base font-normal text-white transition-all duration-200 hover:bg-[#1E1E1E] hover:scale-[1.02] active:scale-[0.98] active:bg-[#0F0F0F] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {getButtonText(plan.id)}
-                </Link>
+                  {loadingPlanId === plan.id ? '前往付款中...' : getButtonText(plan.id)}
+                </button>
               </div>
             )
           })}
