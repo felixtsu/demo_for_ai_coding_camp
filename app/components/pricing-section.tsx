@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { getRewriteUsageSummary } from '@/lib/rewrite/access'
+import { SubscribeButton } from '@/app/components/subscribe-button'
 
 type Plan = {
   id: string
@@ -97,16 +98,6 @@ export default async function PricingSection() {
     return '訂購'
   }
 
-  const getButtonHref = (planId: string) => {
-    if (!user) {
-      return `/login?redirect=/rewrite`
-    }
-    if (currentPlanId === planId) {
-      return `/rewrite`
-    }
-    return `/rewrite?upgrade=${planId}`
-  }
-
   return (
     <section className="flex flex-col gap-8">
       <div className="flex flex-col items-center gap-6">
@@ -178,12 +169,15 @@ export default async function PricingSection() {
               </ul>
 
               <div className="mt-auto space-y-3">
-                <Link
-                  href={getButtonHref(plan.id)}
+                <SubscribeButton
+                  planId={plan.id}
+                  billingPeriod="monthly"
+                  isLoggedIn={Boolean(user)}
+                  isCurrentPlan={currentPlanId === plan.id}
                   className="inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-indigo-500 via-sky-500 to-purple-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-200 hover:scale-[1.02] hover:shadow-xl hover:shadow-indigo-500/40 active:scale-[0.98] active:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
                 >
                   {getButtonText(plan.id)}
-                </Link>
+                </SubscribeButton>
                 {!user && (
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     已是訂閱用戶？前往{' '}
