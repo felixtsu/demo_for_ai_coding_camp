@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { sendServerGAEvent } from '@/lib/analytics/ga4-server'
 
 export const runtime = 'nodejs'
 
@@ -120,6 +121,19 @@ export async function POST(request: Request) {
           console.error('Insert subscription failed:', insertSubError)
         }
       }
+
+      await sendServerGAEvent({
+        eventName: 'purchase',
+        clientId: clientRef,
+        userId: order.user_id,
+        params: {
+          plan_id: order.plan_id,
+          billing_period: order.billing_period,
+          currency: session.currency ?? 'usd',
+          value: session.amount_total ? session.amount_total / 100 : undefined,
+          stripe_checkout_session_id: session.id ?? undefined,
+        },
+      })
     }
 
     return NextResponse.json({ received: true })

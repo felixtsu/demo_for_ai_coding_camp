@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { PricingToggle } from '@/app/components/pricing-toggle'
 import { HeroSection } from '@/app/components/hero-section'
 import { FAQAccordion } from '@/app/components/faq-accordion'
 import { Footer } from '@/app/components/footer'
+import { trackGAEvent } from '@/lib/analytics/ga4-client'
 
 type Plan = {
   id: string
@@ -25,6 +26,17 @@ export function PricingPageClient({ plans, currentPlanId, isLoggedIn = false }: 
   const [period, setPeriod] = useState<'monthly' | 'yearly'>('monthly')
   const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const hasTrackedView = useRef(false)
+
+  useEffect(() => {
+    if (hasTrackedView.current) return
+    trackGAEvent('view_pricing', {
+      plan_count: plans.length,
+      has_active_plan: currentPlanId ? 'yes' : 'no',
+      is_logged_in: isLoggedIn ? 'yes' : 'no',
+    })
+    hasTrackedView.current = true
+  }, [plans.length, currentPlanId, isLoggedIn])
 
   const getPrice = (priceCents: number) => {
     return period === 'yearly' ? Math.round(priceCents * 10) : priceCents
@@ -51,6 +63,12 @@ export function PricingPageClient({ plans, currentPlanId, isLoggedIn = false }: 
 
   const handleSubscribe = async (planId: string) => {
     setErrorMessage(null)
+    trackGAEvent('select_plan', {
+      plan_id: planId,
+      billing_period: period,
+      is_logged_in: isLoggedIn ? 'yes' : 'no',
+    })
+
     if (!isLoggedIn) {
       window.location.href = `/login?redirect=/pricing`
       return
@@ -75,6 +93,18 @@ export function PricingPageClient({ plans, currentPlanId, isLoggedIn = false }: 
       if (!url) {
         throw new Error('未取得支付鏈接')
       }
+      let clientReferenceId: string | undefined
+      try {
+        const parsed = new URL(url)
+        clientReferenceId = parsed.searchParams.get('client_reference_id') ?? undefined
+      } catch {
+        clientReferenceId = undefined
+      }
+      trackGAEvent('begin_checkout', {
+        plan_id: planId,
+        billing_period: period,
+        client_reference_id: clientReferenceId,
+      })
       // Open Stripe Payment Link in a new tab
       window.open(url, '_blank', 'noopener,noreferrer')
     } catch (e) {

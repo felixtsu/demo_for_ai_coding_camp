@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { trackGAEvent } from '@/lib/analytics/ga4-client'
 
 export function LoginForm({ redirect }: { redirect?: string }) {
   const [email, setEmail] = useState('')
@@ -52,6 +53,7 @@ export function LoginForm({ redirect }: { redirect?: string }) {
       }
 
       console.log('Login successful, session:', data.session)
+      trackGAEvent('login', { method: 'email' })
       
       // Wait a bit for session to be stored
       await new Promise(resolve => setTimeout(resolve, 500))

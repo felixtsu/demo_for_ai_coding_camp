@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { trackGAEvent } from '@/lib/analytics/ga4-client'
 
 type RewriteUsage = {
   hasSubscription: boolean
@@ -37,6 +38,7 @@ export function RewriteForm({ initialUsage }: RewriteFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [usage, setUsage] = useState<RewriteUsage>(initialUsage)
+  const hasTrackedStart = useRef(false)
 
   const quota = usage.quota ?? 0
   const remaining = usage.remaining ?? 0
@@ -47,6 +49,15 @@ export function RewriteForm({ initialUsage }: RewriteFormProps) {
   )
   const renewalDate = useMemo(() => formatRenewalDate(usage.renewsAt), [usage.renewsAt])
   const isQuotaDepleted = usage.hasSubscription && quota > 0 && remaining <= 0
+
+  useEffect(() => {
+    if (hasTrackedStart.current) return
+    trackGAEvent('start_rewrite', {
+      has_subscription: usage.hasSubscription ? 'yes' : 'no',
+      plan_id: usage.planId,
+    })
+    hasTrackedStart.current = true
+  }, [usage.hasSubscription, usage.planId])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -72,6 +83,10 @@ export function RewriteForm({ initialUsage }: RewriteFormProps) {
 
       const data = await response.json()
       setOutputText(data.result)
+      trackGAEvent('rewrite_success', {
+        characters: inputText.length,
+        plan_id: usage.planId,
+      })
 
       if (data.usage) {
         setUsage((prev) => ({

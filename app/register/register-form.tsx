@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { trackGAEvent } from '@/lib/analytics/ga4-client'
 
 export function RegisterForm() {
   const [email, setEmail] = useState('')
@@ -33,6 +34,10 @@ export function RegisterForm() {
         setLoading(false)
         return
       }
+
+      trackGAEvent('sign_up', {
+        method: 'email',
+      })
 
       // Wait a moment for cookies to be set, then redirect
       await new Promise(resolve => setTimeout(resolve, 300))
