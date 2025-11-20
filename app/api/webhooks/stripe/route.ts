@@ -532,7 +532,15 @@ function mapStripeSubscriptionStatus(status?: Stripe.Subscription.Status) {
   }
 }
 
-function getString(value: string | Stripe.Customer | Stripe.Subscription | null | undefined) {
+function getString(
+  value:
+    | string
+    | Stripe.Customer
+    | Stripe.Subscription
+    | Stripe.DeletedCustomer
+    | null
+    | undefined,
+) {
   if (!value) return undefined
   if (typeof value === 'string') return value
   if ('id' in value) {
