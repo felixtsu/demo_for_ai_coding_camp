@@ -422,7 +422,7 @@ async function syncUserSubscription(
     billingPeriod: 'monthly' | 'yearly'
     subscriptionId?: string
     customerId?: string
-    status?: 'active' | 'trialing' | 'past_due' | 'canceled'
+    status?: 'active' | 'trialing' | 'past_due' | 'canceled' | 'incomplete'
     currentPeriodStart?: number | string
     currentPeriodEnd?: number | string
     cancelAtPeriodEnd?: boolean
