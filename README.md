@@ -39,6 +39,17 @@ cp .env.example .env.local
 - `NEXT_PUBLIC_SUPABASE_URL`: 你的 Supabase 專案 URL
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: 你的 Supabase Publishable Key
 - `DEEPSEEK_API_KEY`: 你的 DeepSeek API Key
+- `STRIPE_SECRET_KEY`: Stripe 後端祕鑰，用於建立 Payment Intent 與驗證事件
+- `STRIPE_WEBHOOK_SECRET`: Stripe Webhook 簽章驗證祕鑰
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`: Stripe Payment Elements 需要的公開金鑰
+
+Stripe Webhook 需要至少訂閱以下事件才能讓訂閱狀態正確同步：
+
+- `checkout.session.completed`
+- `payment_intent.succeeded`
+- `invoice.paid`
+- `invoice.payment_failed`
+- `customer.subscription.deleted`
 
 ### 3. 執行開發伺服器
 
@@ -77,7 +88,7 @@ npm run dev
 
 ## 訂閱與每日配額
 
-專案提供 `Starter`、`Professional`、`Team` 三種方案，每日配額分別為 5、20、60 次。使用者必須擁有狀態為 `active` 或 `trialing` 的訂閱才可呼叫改寫 API。系統會自動記錄每日使用次數，超額會阻擋請求。
+專案提供 `Starter`、`Professional`、`Team` 三種方案，每日配額分別為 5、20、60 次。使用者必須擁有狀態為 `active` 或 `trialing` 的訂閱才可呼叫改寫 API。系統會自動記錄每日使用次數，超額會阻擋請求。Team 方案可在方案頁面上動態選擇座席數（至少 5 位，每位 HK$39.99），並在 `/team-checkout` 透過 Stripe Payment Elements 完成一次性付款（不會自動續費）。
 
 請在 Supabase 專案中執行 `supabase/migrations/202511130001_subscription_usage.sql` 來建立所需資料表與 `consume_rewrite_credit` RPC 函式。完成後，為用戶新增對應的 `user_subscriptions` 記錄即可開通配額。
 

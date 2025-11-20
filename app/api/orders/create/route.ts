@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 type CreateOrderBody = {
   plan_id?: string
   billing_period?: 'monthly' | 'yearly'
+  seat_count?: number
 }
 
 const PAYMENT_LINKS: Record<string, { monthly?: string; yearly?: string }> = {
@@ -37,11 +38,15 @@ export async function POST(request: Request) {
     const planId = body.plan_id
     const billingPeriod = body.billing_period
 
-    if (!planId || (planId !== 'starter' && planId !== 'professional')) {
+    if (!planId || (planId !== 'starter' && planId !== 'professional' && planId !== 'team')) {
       return NextResponse.json({ error: '無效的方案' }, { status: 400 })
     }
     if (!billingPeriod || (billingPeriod !== 'monthly' && billingPeriod !== 'yearly')) {
       return NextResponse.json({ error: '無效的計費週期' }, { status: 400 })
+    }
+
+    if (planId === 'team') {
+      return NextResponse.json({ error: 'Team 方案請使用專屬付款頁面' }, { status: 400 })
     }
 
     const link = PAYMENT_LINKS[planId]?.[billingPeriod]

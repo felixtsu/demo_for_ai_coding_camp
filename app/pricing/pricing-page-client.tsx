@@ -8,6 +8,9 @@ import { FAQAccordion } from '@/app/components/faq-accordion'
 import { Footer } from '@/app/components/footer'
 import { trackGAEvent } from '@/lib/analytics/ga4-client'
 
+const TEAM_MIN_SEATS = 5
+const TEAM_SEAT_PRICE_CENTS = 3999
+
 type Plan = {
   id: string
   name: string
@@ -26,6 +29,7 @@ export function PricingPageClient({ plans, currentPlanId, isLoggedIn = false }: 
   const [period, setPeriod] = useState<'monthly' | 'yearly'>('monthly')
   const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [teamSeats, setTeamSeats] = useState<number>(TEAM_MIN_SEATS)
   const hasTrackedView = useRef(false)
 
   useEffect(() => {
@@ -41,6 +45,24 @@ export function PricingPageClient({ plans, currentPlanId, isLoggedIn = false }: 
   const getPrice = (priceCents: number) => {
     return period === 'yearly' ? Math.round(priceCents * 10) : priceCents
   }
+
+  const formatCurrency = (priceCents: number) => {
+    return (priceCents / 100).toLocaleString('en-US', {
+      minimumFractionDigits: priceCents % 100 === 0 ? 0 : 2,
+      maximumFractionDigits: 2,
+    })
+  }
+
+  const getTeamUnitAmount = () => (period === 'yearly' ? TEAM_SEAT_PRICE_CENTS * 10 : TEAM_SEAT_PRICE_CENTS)
+
+  const getPlanPrice = (plan: Plan) => {
+    if (plan.id === 'team') {
+      return getTeamUnitAmount() * teamSeats
+    }
+    return getPrice(plan.price_cents)
+  }
+
+  const getCurrencySymbol = (planId: string) => (planId === 'team' ? 'HK$' : '$')
 
   const getButtonText = (planId: string) => {
     if (!isLoggedIn) {
@@ -67,6 +89,7 @@ export function PricingPageClient({ plans, currentPlanId, isLoggedIn = false }: 
       plan_id: planId,
       billing_period: period,
       is_logged_in: isLoggedIn ? 'yes' : 'no',
+      team_seats: planId === 'team' ? teamSeats : undefined,
     })
 
     if (!isLoggedIn) {
@@ -77,12 +100,28 @@ export function PricingPageClient({ plans, currentPlanId, isLoggedIn = false }: 
       window.location.href = `/rewrite`
       return
     }
+    if (planId === 'team' && teamSeats < TEAM_MIN_SEATS) {
+      setErrorMessage(`Team 方案至少需 ${TEAM_MIN_SEATS} 個座席`)
+      return
+    }
+
+    if (planId === 'team') {
+      const target = new URL('/team-checkout', window.location.origin)
+      target.searchParams.set('seats', String(teamSeats))
+      target.searchParams.set('period', period)
+      window.location.href = target.toString().replace(window.location.origin, '')
+      return
+    }
+
     try {
       setLoadingPlanId(planId)
       const response = await fetch('/api/orders/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan_id: planId, billing_period: period }),
+        body: JSON.stringify({
+          plan_id: planId,
+          billing_period: period,
+        }),
       })
       if (!response.ok) {
         const data = await response.json().catch(() => ({}))
@@ -104,6 +143,7 @@ export function PricingPageClient({ plans, currentPlanId, isLoggedIn = false }: 
         plan_id: planId,
         billing_period: period,
         client_reference_id: clientReferenceId,
+        team_seats: undefined,
       })
       // Open Stripe Payment Link in a new tab
       window.open(url, '_blank', 'noopener,noreferrer')
@@ -129,7 +169,7 @@ export function PricingPageClient({ plans, currentPlanId, isLoggedIn = false }: 
 
         <div className="grid w-full grid-cols-3 gap-16 items-stretch">
           {plans.map((plan) => {
-            const price = getPrice(plan.price_cents)
+            const price = getPlanPrice(plan)
             return (
               <div
                 key={plan.id}
@@ -144,12 +184,47 @@ export function PricingPageClient({ plans, currentPlanId, isLoggedIn = false }: 
                   </p>
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold leading-[1em] tracking-[-0.02em] text-[#1E1E1E]">
-                      ${Math.floor(price / 100)}
+                      {getCurrencySymbol(plan.id)}
+                      {formatCurrency(price)}
                     </span>
                     <span className="text-sm font-normal leading-[1.8em] text-[#1E1E1E]">
-                      / mo
+                      / {period === 'yearly' ? 'yr' : 'mo'}
                     </span>
                   </div>
+                  {plan.id === 'team' && (
+                    <div className="flex w-full flex-col gap-2 rounded-lg border border-[#EFEFEF] bg-[#FAFAFA] p-4">
+                      <label className="text-sm font-medium text-[#1E1E1E]">Team 座席數（最少 {TEAM_MIN_SEATS} 位）</label>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          className="flex h-10 w-10 items-center justify-center rounded border border-[#D9D9D9] bg-white text-xl text-[#1E1E1E] disabled:opacity-50"
+                          onClick={() => setTeamSeats((prev) => Math.max(TEAM_MIN_SEATS, prev - 1))}
+                          disabled={teamSeats <= TEAM_MIN_SEATS}
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          min={TEAM_MIN_SEATS}
+                          value={teamSeats}
+                          onChange={(event) => {
+                            const next = Number(event.target.value)
+                            if (Number.isNaN(next)) return
+                            setTeamSeats(Math.max(TEAM_MIN_SEATS, Math.floor(next)))
+                          }}
+                          className="w-full rounded border border-[#D9D9D9] bg-white p-2 text-center text-lg font-semibold text-[#1E1E1E]"
+                        />
+                        <button
+                          type="button"
+                          className="flex h-10 w-10 items-center justify-center rounded border border-[#D9D9D9] bg-white text-xl text-[#1E1E1E]"
+                          onClick={() => setTeamSeats((prev) => prev + 1)}
+                        >
+                          +
+                        </button>
+                      </div>
+                      <p className="text-xs text-[#757575]">每席 HK$39.99 / 月（年繳 10 個月價）</p>
+                    </div>
+                  )}
                   <p className="text-sm text-[#757575]">
                     每日 {plan.daily_quota} 次改寫配額
                   </p>
