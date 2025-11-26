@@ -51,13 +51,33 @@ Stripe Webhook 需要至少訂閱以下事件才能讓訂閱狀態正確同步�
 - `invoice.payment_failed`
 - `customer.subscription.deleted`
 
-### 3. 執行開發伺服器
+### 3. 建立 Supabase 資料庫
+
+1. 安裝並登入 [Supabase CLI](https://supabase.com/docs/guides/cli)。
+2. 與你的專案連線：
+   ```bash
+   supabase login
+   supabase link --project-ref <your-project-ref>
+   ```
+3. 套用現有遷移（或手動執行 `docs/database-schema.md` 中的 DDL）：
+   ```bash
+   supabase db push
+   # or when developing locally
+   supabase db reset
+   ```
+4. 根據 README 的「資料庫 Schema」段落確認表結構與說明。
+
+### 4. 執行開發伺服器
 
 ```bash
 npm run dev
 ```
 
 開啟 [http://localhost:3000](http://localhost:3000) 查看應用。
+
+## 資料庫 Schema
+
+完整的 Supabase 表結構、欄位約束與使用說明請參考 [`docs/database-schema.md`](docs/database-schema.md)。若有新的表或欄位變更，請先更新該文件，再產出對應的 `supabase/migrations/*.sql` 檔案。
 
 ## 專案結構
 
